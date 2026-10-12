@@ -19,17 +19,19 @@ export function createSupabaseAdmin(opts: {
 }): ProviderAdmin {
   const base = opts.supabaseUrl.replace(/\/$/, "");
   const f = opts.fetch ?? fetch;
+  // New-style secret keys (sb_secret_…) are not JWTs: send them only as `apikey`.
+  // Legacy service_role keys are JWTs and also go in Authorization.
+  const isNewKey = opts.serviceRoleKey.startsWith("sb_secret_");
+  const adminHeaders: Record<string, string> = isNewKey
+    ? { apikey: opts.serviceRoleKey }
+    : { apikey: opts.serviceRoleKey, Authorization: `Bearer ${opts.serviceRoleKey}` };
   return {
     async setBanned(authUserId, banned) {
       if (!/^[0-9a-f-]{36}$/i.test(authUserId)) return false;
       try {
         const res = await f(`${base}/auth/v1/admin/users/${authUserId}`, {
           method: "PUT",
-          headers: {
-            apikey: opts.serviceRoleKey,
-            Authorization: `Bearer ${opts.serviceRoleKey}`,
-            "Content-Type": "application/json",
-          },
+          headers: { ...adminHeaders, "Content-Type": "application/json" },
           body: JSON.stringify({ ban_duration: banned ? "876000h" : "none" }),
         });
         return res.ok;

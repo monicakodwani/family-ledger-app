@@ -1,5 +1,30 @@
 # Deployment guide
 
+## Quick setup (recommended)
+
+One command does everything below except the clicks only you can do:
+
+```bash
+npm run setup
+```
+
+What you'll be asked to do (about 10 minutes):
+
+1. Type three email addresses.
+2. Click **Create GitHub App**, then **Install** (choose only `family-ledger-private-data`).
+3. Create a Supabase access token and paste it (sign up first if needed).
+4. Possibly turn on **Passkeys** in Supabase (the script shows the exact values) if Supabase's API doesn't allow it yet.
+5. Sign in to Cloudflare and click **Allow**.
+6. Type `yes` to switch the website from the demo to the real app.
+7. Send each person the sign-in link the script prints (e.g. on WhatsApp).
+8. Save `~/.family-ledger-setup/secrets.json` in your password manager.
+
+The script creates the private repository, the encryption key, the GitHub App, the Supabase project (Mumbai), the Cloudflare Worker and its secrets, sets the website's variables, republishes it, and checks that the API refuses anyone not signed in. It's safe to re-run; finished steps are skipped. `npm run setup -- links` makes fresh sign-in links (valid 24 hours).
+
+Sign-in links are generated instead of emailed because Supabase's built-in email only delivers to members of your Supabase team. If you want the "Email me a sign-in link" button to work for everyone, add a custom SMTP provider in Supabase (Authentication → Emails → SMTP).
+
+The manual steps below explain what the script does, and are there if you prefer to do it by hand.
+
 This guide takes Family Ledger from this repository to a working private app on three phones. It uses only free tiers, but please read the cost and limitation notes at the end.
 
 You'll need accounts on **GitHub**, **Cloudflare** and **Supabase**, plus Node.js 22+ on your computer.

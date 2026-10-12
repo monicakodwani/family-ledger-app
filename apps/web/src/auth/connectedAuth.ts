@@ -4,10 +4,12 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "../env";
+import { takeFragmentSession } from "./hashSession";
 import * as passkeys from "./passkeys";
 import type { AuthAdapter } from "./types";
 
 export function createConnectedAuth(): AuthAdapter {
+  const fragment = takeFragmentSession();
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       flowType: "pkce",
@@ -20,13 +22,22 @@ export function createConnectedAuth(): AuthAdapter {
     },
   });
 
+  const ready: Promise<void> = fragment
+    ? supabase.auth.setSession(fragment).then(
+        () => undefined,
+        () => undefined,
+      )
+    : Promise.resolve();
+
   return {
     kind: "connected",
     async hasSession() {
+      await ready;
       const { data } = await supabase.auth.getSession();
       return Boolean(data.session);
     },
     async getAccessToken() {
+      await ready;
       const { data } = await supabase.auth.getSession();
       return data.session?.access_token ?? null;
     },
