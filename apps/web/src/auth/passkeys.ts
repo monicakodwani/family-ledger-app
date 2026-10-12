@@ -17,7 +17,8 @@ interface PasskeyCapableAuth {
   };
 }
 
-export const PASSKEYS_UNAVAILABLE = "Passkeys aren't available yet — use the email link.";
+export const PASSKEYS_UNAVAILABLE =
+  "This browser can't use passkeys. Try Safari, Chrome or Edge, or ask Monica for a sign-in link.";
 
 function auth(supabase: SupabaseClient): PasskeyCapableAuth {
   return supabase.auth as unknown as PasskeyCapableAuth;
@@ -42,10 +43,10 @@ export async function signInWithPasskey(supabase: SupabaseClient): Promise<AuthR
   if (!browserSupportsPasskeys() || typeof fn !== "function") return { ok: false, message: PASSKEYS_UNAVAILABLE };
   try {
     const { error } = await fn.call(supabase.auth);
-    if (error) return friendly(error, "Face ID sign-in didn't finish. You can try again or use the email link.");
+    if (error) return friendly(error, "Face ID sign-in didn't finish. Please try again.");
     return { ok: true };
   } catch {
-    return { ok: false, message: "Face ID sign-in didn't finish. You can try again or use the email link." };
+    return { ok: false, message: "Face ID sign-in didn't finish. Please try again." };
   }
 }
 

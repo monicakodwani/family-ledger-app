@@ -348,7 +348,7 @@ function PasskeyOffer() {
         <ScanFace aria-hidden className="mt-0.5 size-6 shrink-0 text-accent" />
         <div>
           <p className="font-semibold">Set up Face ID sign-in</p>
-          <p className="mt-1 text-muted">Next time you can sign in with Face ID instead of an email link.</p>
+          <p className="mt-1 text-muted">Next time you can sign in with Face ID instead of a link.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button onClick={() => void setup()} disabled={busy}>
               {busy ? "Waiting for Face ID…" : "Set up Face ID"}

@@ -21,7 +21,7 @@ What you'll be asked to do (about 10 minutes):
 
 The script creates the private repository, the encryption key, the GitHub App, the Supabase project (Mumbai), the Cloudflare Worker and its secrets, sets the website's variables, republishes it, and checks that the API refuses anyone not signed in. It's safe to re-run; finished steps are skipped. `npm run setup -- links` makes fresh sign-in links (valid 24 hours).
 
-Sign-in links are generated instead of emailed because Supabase's built-in email only delivers to members of your Supabase team. If you want the "Email me a sign-in link" button to work for everyone, add a custom SMTP provider in Supabase (Authentication → Emails → SMTP).
+Sign-in links are generated instead of emailed because Supabase's built-in email only delivers to members of your Supabase team. The app has no "email me a link" option, because built-in Supabase email cannot reach the family. To add one later, connect a custom SMTP provider in Supabase first (Authentication → Emails → SMTP).
 
 The manual steps below explain what the script does, and are there if you prefer to do it by hand.
 

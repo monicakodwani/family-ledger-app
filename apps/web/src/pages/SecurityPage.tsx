@@ -250,11 +250,10 @@ function SignInMethods() {
         {!connected ? (
           <p className="flex items-start gap-3 text-muted">
             <Fingerprint aria-hidden className="mt-0.5 size-5 shrink-0" />
-            In the real app, each person signs in with Face ID (a passkey) or an email link. The demo only simulates
-            this.
+            In the real app, each person signs in with Face ID (a passkey). The demo only simulates this.
           </p>
         ) : list === null ? (
-          <p className="text-muted">Passkeys aren't available yet — use the email link.</p>
+          <p className="text-muted">This browser can't use passkeys. Try Safari, Chrome or Edge.</p>
         ) : (
           <>
             {list.length === 0 && <p className="text-muted">No Face ID passkeys yet.</p>}
@@ -297,7 +296,7 @@ function SignInMethods() {
         open={Boolean(removing)}
         onOpenChange={(o) => !o && setRemoving(null)}
         title="Remove this passkey?"
-        body={<p>That device won't be able to sign in with Face ID any more. You can still use the email link.</p>}
+        body={<p>That device won't be able to sign in with Face ID until it's set up again.</p>}
         confirmLabel="Remove passkey"
         tone="danger"
         onConfirm={async () => {

@@ -1,8 +1,7 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { CircleAlert, FlaskConical, Mail, ScanFace, ShieldCheck } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { CircleAlert, FlaskConical, ScanFace, ShieldCheck } from "lucide-react";
 import { FRIENDLY_ERRORS, LedgerClientError } from "@family-ledger/shared";
 import { Button } from "../components/ui/button";
-import { Field, Input } from "../components/ui/field";
 import { DemoBanner, OfflineBanner } from "../components/AppShell";
 import { isDemoClient, type SessionEndCode } from "../data/types";
 import { PASSKEYS_UNAVAILABLE } from "./passkeys";
@@ -135,9 +134,6 @@ function ConnectedSignIn() {
   const { auth, completeSignIn, endedReason } = useAuth();
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(() => auth?.linkProblem() ?? null);
-  const [showEmail, setShowEmail] = useState(false);
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
   const passkeys = auth?.passkeysAvailable() ?? false;
 
   const faceId = async () => {
@@ -158,21 +154,6 @@ function ConnectedSignIn() {
     }
   };
 
-  const sendLink = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!auth) return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setProblem("Please check the email address.");
-      return;
-    }
-    setBusy(true);
-    setProblem(null);
-    const result = await auth.sendEmailLink(email);
-    setBusy(false);
-    if (result.ok) setSent(true);
-    else setProblem(result.message);
-  };
-
   return (
     <Frame>
       <div className="mb-8 flex flex-col items-center text-center">
@@ -185,62 +166,14 @@ function ConnectedSignIn() {
           {problem}
         </p>
       )}
-      {sent ? (
-        <div role="status" className="rounded-2xl border border-line bg-card p-6 text-center shadow-card">
-          <Mail aria-hidden className="mx-auto size-10 text-accent" />
-          <h2 className="mt-3 text-xl font-bold">Check your email</h2>
-          <p className="mt-2 text-muted">
-            If this address belongs to our family, a sign-in link is on its way. Open it on this phone to sign in.
-          </p>
-          <Button variant="ghost" className="mt-4" onClick={() => setSent(false)}>
-            Use a different email
-          </Button>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <Button
-            size="lg"
-            block
-            onClick={() => void faceId()}
-            disabled={busy || !passkeys}
-            className="min-h-16 text-lg"
-          >
-            <ScanFace aria-hidden className="size-6" />
-            Sign in with Face ID
-          </Button>
-          {!passkeys && <p className="text-center text-muted">{PASSKEYS_UNAVAILABLE}</p>}
-          {!showEmail ? (
-            <Button variant="secondary" size="lg" block onClick={() => setShowEmail(true)}>
-              <Mail aria-hidden className="size-5" />
-              Email me a sign-in link
-            </Button>
-          ) : (
-            <form
-              onSubmit={(e) => void sendLink(e)}
-              className="space-y-4 rounded-2xl border border-line bg-card p-5 shadow-card"
-            >
-              <Field label="Your email address">
-                {({ id, describedBy, invalid }) => (
-                  <Input
-                    id={id}
-                    type="email"
-                    autoComplete="email"
-                    inputMode="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    aria-describedby={describedBy}
-                    aria-invalid={invalid}
-                    required
-                  />
-                )}
-              </Field>
-              <Button type="submit" size="lg" block disabled={busy}>
-                {busy ? "Sending…" : "Send the link"}
-              </Button>
-            </form>
-          )}
-        </div>
-      )}
+      <div className="space-y-4">
+        <Button size="lg" block onClick={() => void faceId()} disabled={busy || !passkeys} className="min-h-16 text-lg">
+          <ScanFace aria-hidden className="size-6" />
+          Sign in with Face ID
+        </Button>
+        {!passkeys && <p className="text-center text-muted">{PASSKEYS_UNAVAILABLE}</p>}
+        <p className="text-center text-muted">Can't sign in? Ask Monica for a sign-in link.</p>
+      </div>
       <p className="mt-10 flex items-start justify-center gap-2 text-center text-[0.9375rem] text-muted">
         <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
         Only our family can sign in. Nothing is stored on this phone.
