@@ -1,0 +1,51 @@
+{
+  // Family Ledger API — Cloudflare Worker
+  // Secrets (set with `wrangler secret put NAME`, never committed):
+  //   FAMILY_MEMBERS, GITHUB_APP_PRIVATE_KEY, DATA_ENCRYPTION_KEYS, SUPABASE_SERVICE_ROLE_KEY (optional)
+  // FAMILY_MEMBERS is a secret only to keep personal emails out of git; it is not a credential.
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "family-ledger-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [{ "name": "SECURITY", "class_name": "SecurityDurableObject" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SecurityDurableObject"] }],
+  "vars": {
+    "ENVIRONMENT": "production",
+    // Exact origin of the GitHub Pages site (or custom domain). No trailing slash.
+    "ALLOWED_ORIGINS": "https://YOUR-GITHUB-USERNAME.github.io",
+    "SUPABASE_URL": "https://YOUR-PROJECT-REF.supabase.co",
+    "STORAGE_BACKEND": "github",
+    "GITHUB_OWNER": "YOUR-GITHUB-USERNAME",
+    "GITHUB_REPO": "family-ledger-private-data",
+    "GITHUB_BRANCH": "main",
+    "GITHUB_APP_ID": "",
+    "GITHUB_APP_INSTALLATION_ID": "",
+    "DATA_ACTIVE_KEY_ID": "k1",
+    "IDLE_TIMEOUT_MINUTES": "60",
+    "SESSION_MAX_AGE_HOURS": "12",
+    "FRESH_AUTH_MINUTES": "5",
+    "SEED_STARTER_ACCOUNTS": "true",
+  },
+  "env": {
+    "dev": {
+      "vars": {
+        "ENVIRONMENT": "development",
+        "ALLOWED_ORIGINS": "http://localhost:5173",
+        "SUPABASE_URL": "https://YOUR-PROJECT-REF.supabase.co",
+        "STORAGE_BACKEND": "memory",
+        "DATA_ACTIVE_KEY_ID": "k1",
+        "IDLE_TIMEOUT_MINUTES": "60",
+        "SESSION_MAX_AGE_HOURS": "12",
+        "FRESH_AUTH_MINUTES": "5",
+        "SEED_STARTER_ACCOUNTS": "true",
+      },
+      "durable_objects": {
+        "bindings": [{ "name": "SECURITY", "class_name": "SecurityDurableObject" }],
+      },
+    },
+  },
+}

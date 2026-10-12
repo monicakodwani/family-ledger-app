@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    -apple-system, "SF Pro Text", BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue",
+    Arial, sans-serif;
+
+  --color-cream: #faf7f2;
+  --color-cream-deep: #f3eee6;
+  --color-card: #ffffff;
+  --color-ink: #1f1b16;
+  --color-muted: #625a51;
+  --color-line: #e6ded2;
+  --color-line-strong: #d4c9ba;
+
+  --color-accent: #1f5f5b;
+  --color-accent-hover: #184c49;
+  --color-accent-soft: #e4efec;
+  --color-accent-ink: #ffffff;
+
+  --color-est-bg: #fbf0db;
+  --color-est-ink: #74490a;
+  --color-est-line: #ecd3a4;
+  --color-ver-bg: #e6f0e5;
+  --color-ver-ink: #2c5a33;
+  --color-ver-line: #bcd5bb;
+  --color-con-bg: #f9e5e5;
+  --color-con-ink: #8a2c38;
+  --color-con-line: #e9bfc3;
+  --color-none-bg: #efebe5;
+  --color-none-ink: #564f47;
+  --color-none-line: #d9d1c6;
+  --color-wait-bg: #ebe8f3;
+  --color-wait-ink: #4a4170;
+  --color-wait-line: #d0c9e3;
+  --color-old-bg: #f6e8da;
+  --color-old-ink: #79461b;
+  --color-old-line: #e5c9ab;
+
+  --color-chart-1: #1f5f5b;
+  --color-chart-2: #8fb3a0;
+  --color-chart-3: #c9963b;
+  --color-chart-4: #8e7a9c;
+  --color-chart-5: #b9aea1;
+
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+  --shadow-card: 0 1px 2px rgb(31 27 22 / 0.04), 0 2px 8px rgb(31 27 22 / 0.04);
+  --shadow-sheet: 0 -8px 32px rgb(31 27 22 / 0.12);
+}
+
+@layer base {
+  html {
+    font-size: 106.25%; /* 17px */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    background: var(--color-cream);
+  }
+  html[data-text-size="large"] {
+    font-size: 118.75%; /* 19px */
+  }
+  html[data-text-size="xlarge"] {
+    font-size: 131.25%; /* 21px */
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  /* iOS zooms into inputs below 16px. */
+  input,
+  select,
+  textarea {
+    font-size: max(1rem, 16px);
+  }
+  h1,
+  h2,
+  h3 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@utility safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-sheet-in {
+  animation: sheet-in 180ms ease-out;
+}
+.animate-fade-in {
+  animation: fade-in 150ms ease-out;
+}

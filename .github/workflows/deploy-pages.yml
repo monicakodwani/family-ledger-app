@@ -1,0 +1,56 @@
+name: Deploy to GitHub Pages
+
+# Builds ONLY the static frontend and publishes it. The API, its secrets and the
+# private data repository are never part of this artefact.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint && npm run typecheck && npm test
+      - name: Build frontend
+        env:
+          # Set APP_MODE to "connected" (repository variable) once the API and Supabase are configured.
+          # Until then the site is published as the fictional demo.
+          VITE_APP_MODE: ${{ vars.APP_MODE || 'demo' }}
+          VITE_BASE_PATH: ${{ vars.BASE_PATH || format('/{0}/', github.event.repository.name) }}
+          VITE_API_BASE_URL: ${{ vars.APP_MODE == 'connected' && vars.API_BASE_URL || '' }}
+          VITE_SUPABASE_URL: ${{ vars.APP_MODE == 'connected' && vars.SUPABASE_URL || '' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.APP_MODE == 'connected' && vars.SUPABASE_PUBLISHABLE_KEY || '' }}
+        run: |
+          if [ "$VITE_APP_MODE" = "connected" ]; then npm run build; else npm run build:demo; fi
+      - name: Guard against publishing anything sensitive
+        run: node scripts/check-pages-artifact.mjs apps/web/dist
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

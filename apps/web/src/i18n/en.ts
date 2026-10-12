@@ -1,0 +1,51 @@
+/** English copy. Keys are used by t(); add Hindi in hi.ts. */
+export const en = {
+  "nav.home": "Home",
+  "nav.money": "Money",
+  "nav.accounts": "Accounts",
+  "nav.plans": "Plans",
+  "nav.more": "More",
+  "nav.main": "Main",
+
+  "page.home": "Home",
+  "page.money": "Our Money",
+  "page.accounts": "Accounts",
+  "page.addAccount": "Add an account",
+  "page.editAccount": "Edit account",
+  "page.updateAmount": "Update amount",
+  "page.plans": "Plans",
+  "page.newPlan": "New plan",
+  "page.more": "More",
+  "page.notes": "Notes",
+  "page.newNote": "New note",
+  "page.checks": "Things to check",
+  "page.documents": "Documents",
+  "page.activity": "Family activity",
+  "page.archived": "Archived",
+  "page.security": "Security",
+  "page.settings": "Settings",
+  "page.help": "Help",
+
+  "action.save": "Save",
+  "action.cancel": "Cancel",
+  "action.back": "Back",
+  "action.close": "Close",
+  "action.edit": "Edit",
+  "action.updateAmount": "Update amount",
+  "action.addAccount": "Add account",
+  "action.addNote": "Add note",
+  "action.newPlan": "New plan",
+  "action.signOut": "Sign out",
+  "action.showDetails": "Show details",
+  "action.hideDetails": "Hide details",
+  "action.tryAgain": "Try again",
+  "action.restore": "Bring it back",
+  "action.archive": "Archive",
+
+  "toast.saved": "Saved.",
+  "demo.banner": "Demo — made-up information. Changes disappear when you close the app.",
+  "offline.banner":
+    "You're offline. Family money details aren't stored on this phone for safety, so they'll appear again when you're connected.",
+} as const;
+
+export type MessageKey = keyof typeof en;

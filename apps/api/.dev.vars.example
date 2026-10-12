@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `wrangler dev --env dev`. Never commit .dev.vars.
+FAMILY_MEMBERS=[{"id":"m_mumma","displayName":"Neeta","email":"mumma@example.com"},{"id":"m_papa","displayName":"Chandra","email":"papa@example.com"},{"id":"m_me","displayName":"Monica","email":"riya@example.com"}]
+# Generate with: node -e "console.log(JSON.stringify({k1: require('crypto').randomBytes(32).toString('base64')}))"
+DATA_ENCRYPTION_KEYS={"k1":"REPLACE_WITH_BASE64_32_BYTES"}
