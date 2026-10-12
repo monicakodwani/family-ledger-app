@@ -378,7 +378,14 @@ export function createApp(deps: AppDeps) {
       return finish(
         errorResponse(err),
         err.code,
-        e instanceof AuthError ? e.reason : e instanceof Error ? e.name : undefined,
+        e instanceof AuthError
+          ? e.reason
+          : // For unexpected errors, include the code-level message (never request data) so failures are diagnosable.
+            e instanceof Error
+            ? err.code === "internal"
+              ? `${e.name}: ${e.message}`.slice(0, 200)
+              : e.name
+            : undefined,
       );
     }
   }

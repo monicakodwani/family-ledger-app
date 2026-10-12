@@ -4,7 +4,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "../env";
-import { takeFragmentSession } from "./hashSession";
+import { EXPIRED_LINK_MESSAGE, takeFragmentSession } from "./hashSession";
 import * as passkeys from "./passkeys";
 import type { AuthAdapter } from "./types";
 
@@ -22,12 +22,18 @@ export function createConnectedAuth(): AuthAdapter {
     },
   });
 
-  const ready: Promise<void> = fragment
-    ? supabase.auth.setSession(fragment).then(
-        () => undefined,
-        () => undefined,
-      )
-    : Promise.resolve();
+  let linkProblem: string | null = fragment && "error" in fragment ? fragment.error : null;
+  const ready: Promise<void> =
+    fragment && "session" in fragment
+      ? supabase.auth.setSession(fragment.session).then(
+          ({ error }) => {
+            if (error) linkProblem = EXPIRED_LINK_MESSAGE;
+          },
+          () => {
+            linkProblem = EXPIRED_LINK_MESSAGE;
+          },
+        )
+      : Promise.resolve();
 
   return {
     kind: "connected",
@@ -64,6 +70,7 @@ export function createConnectedAuth(): AuthAdapter {
     registerPasskey: () => passkeys.registerPasskey(supabase),
     listPasskeys: () => passkeys.listPasskeys(supabase),
     deletePasskey: (id: string) => passkeys.deletePasskey(supabase, id),
+    linkProblem: () => linkProblem,
     async signOut() {
       try {
         await supabase.auth.signOut({ scope: "local" });

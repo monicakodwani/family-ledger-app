@@ -52,15 +52,21 @@ export class SecurityDurableObject extends DurableObject {
   }
 }
 
-/** Worker-side client: every SecurityService call becomes one RPC to the object. */
+/**
+ * Worker-side client: every SecurityService call becomes one RPC to the object.
+ * A Durable Object stub is an I/O object tied to the request that created it, so
+ * a fresh stub is made for every call (cheap) — the client itself is cached
+ * across requests and must never hold one.
+ */
 export function durableSecurityClient(namespace: DurableObjectNamespace): SecurityService {
-  const stub = namespace.get(namespace.idFromName("family")) as unknown as {
-    call(method: string, args: unknown[]): Promise<unknown>;
-  };
+  const id = namespace.idFromName("family");
   return new Proxy({} as SecurityService, {
     get(_t, prop: string) {
       if (!ALLOWED.has(prop as Method)) return undefined;
-      return (...args: unknown[]) => stub.call(prop, args);
+      return (...args: unknown[]) => {
+        const stub = namespace.get(id) as unknown as { call(method: string, args: unknown[]): Promise<unknown> };
+        return stub.call(prop, args);
+      };
     },
   });
 }

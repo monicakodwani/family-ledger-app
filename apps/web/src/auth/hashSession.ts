@@ -10,10 +10,12 @@ export interface FragmentSession {
   refresh_token: string;
 }
 
-export function takeFragmentSession(
-  loc: Location = window.location,
-  hist: History = window.history,
-): FragmentSession | null {
+export const EXPIRED_LINK_MESSAGE =
+  "This sign-in link has expired or was already used. Ask Monica for a new link, or use Face ID if you've set it up.";
+
+export type FragmentResult = { session: FragmentSession } | { error: string } | null;
+
+export function takeFragmentSession(loc: Location = window.location, hist: History = window.history): FragmentResult {
   if (!loc.hash || loc.hash.length < 2) return null;
   const params = new URLSearchParams(loc.hash.slice(1));
   const isAuthFragment = params.has("access_token") || params.has("error") || params.has("error_code");
@@ -22,6 +24,6 @@ export function takeFragmentSession(
   hist.replaceState(hist.state, "", loc.pathname + loc.search);
   const access_token = params.get("access_token");
   const refresh_token = params.get("refresh_token");
-  if (!access_token || !refresh_token) return null;
-  return { access_token, refresh_token };
+  if (!access_token || !refresh_token) return { error: EXPIRED_LINK_MESSAGE };
+  return { session: { access_token, refresh_token } };
 }

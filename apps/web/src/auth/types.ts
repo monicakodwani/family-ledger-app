@@ -21,6 +21,8 @@ export interface AuthAdapter {
   deletePasskey(id: string): Promise<AuthResult>;
   /** Local sign-out (clears the session stored in this tab). */
   signOut(): Promise<void>;
+  /** A friendly message if the page was opened from a sign-in link that didn't work. */
+  linkProblem(): string | null;
   /** Called when the auth library reports the user signed out elsewhere. */
   onSignedOut(callback: () => void): () => void;
 }
@@ -36,5 +38,6 @@ export const demoAuthAdapter: AuthAdapter = {
   listPasskeys: async () => null,
   deletePasskey: async () => ({ ok: false, message: "Not used in the demo." }),
   signOut: async () => undefined,
+  linkProblem: () => null,
   onSignedOut: () => () => undefined,
 };

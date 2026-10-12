@@ -134,7 +134,7 @@ function DemoSignIn() {
 function ConnectedSignIn() {
   const { auth, completeSignIn, endedReason } = useAuth();
   const [busy, setBusy] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(() => auth?.linkProblem() ?? null);
   const [showEmail, setShowEmail] = useState(false);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);

@@ -3,8 +3,9 @@
  * Family Ledger one-command setup.
  *
  *   npm run setup            set everything up (safe to re-run; finished steps are skipped)
- *   npm run setup -- links   make fresh sign-in links for the family
+ *   npm run setup -- links [names]   fresh sign-in links (e.g. `links neeta chandra`)
  *   npm run setup -- status  show what has been set up
+ *   npm run setup -- emails  re-enter the family's email addresses, then continue
  *
  * What you do yourself: sign in to Supabase/Cloudflare when asked, click
  * "Create" and "Install" for the GitHub App, and type three email addresses.
@@ -161,13 +162,21 @@ async function collectFamily() {
     return;
   }
   info("Each person signs in with their own email. Use the address they can open on their phone.");
-  const people = [];
-  for (const name of ["Neeta", "Chandra", "Monica"]) {
-    const display = await ask(`Name`, { fallback: name });
-    const email = await ask(`${display}'s email`, { validate: validEmail });
-    people.push({ name: display, email });
+  for (;;) {
+    const people = [];
+    for (const name of ["Neeta", "Chandra", "Monica"]) {
+      const email = await ask(`${name}'s email`, { validate: validEmail });
+      people.push({ name, email });
+    }
+    console.log("");
+    people.forEach((p) => info(`${p.name}: ${p.email}`));
+    const answer = await ask("Is this right? (yes/no)", { validate: (a) => /^(y|yes|n|no)$/i.test(a) });
+    if (/^y/i.test(answer)) {
+      state.members = familyMembers(people);
+      break;
+    }
+    info("OK, let's enter them again.");
   }
-  state.members = familyMembers(people);
   saveState();
   ok("Saved.");
 }
@@ -433,7 +442,8 @@ async function cloudflare() {
   if (!deploy.ok) {
     if (/workers\.dev subdomain/i.test(deploy.out)) {
       you("Pick a free workers.dev subdomain in the tab that opens, then run `npm run setup` again.");
-      openBrowser("https://dash.cloudflare.com/?to=/:account/workers-and-pages");
+      const onboarding = deploy.out.match(/https:\/\/dash\.cloudflare\.com\/[a-f0-9]+\/workers\/onboarding/)?.[0];
+      openBrowser(onboarding ?? "https://dash.cloudflare.com/?to=/:account/workers-and-pages");
       process.exit(1);
     }
     fail("Deploying the Worker failed (see above).");
@@ -460,10 +470,15 @@ async function cloudflare() {
   saveState();
   ok("Secrets stored in Cloudflare.");
 
+  // A brand-new workers.dev subdomain can take several minutes to get its HTTPS certificate.
   let healthy = false;
-  for (let i = 0; i < 20 && !healthy; i++) {
-    await sleep(3000);
-    healthy = (await http(`${state.apiUrl}/api/health`)).json?.ok === true;
+  for (let i = 0; i < 100 && !healthy; i++) {
+    if (i === 3) info("Waiting for Cloudflare to finish setting up the new address (can take a few minutes)…");
+    await sleep(6000);
+    healthy = await http(`${state.apiUrl}/api/health`).then(
+      (r) => r.json?.ok === true,
+      () => false,
+    );
   }
   if (!healthy)
     fail(`The API at ${state.apiUrl} isn't answering. Check the Worker's logs in the Cloudflare dashboard.`);
@@ -515,13 +530,18 @@ async function publishConnected() {
   return true;
 }
 
-async function signInLinks() {
+async function signInLinks(only = []) {
   step(9, "Sign-in links for the family");
   const key = secrets.supabaseServiceKey;
   if (!key || !state.supabaseUrl) fail("Supabase isn't set up yet.");
   const headers = key.startsWith("sb_secret_") ? { apikey: key } : { apikey: key, Authorization: `Bearer ${key}` };
   const lines = [];
-  for (const m of state.members) {
+  const wanted = only.map((n) => n.toLowerCase());
+  const members = wanted.length
+    ? state.members.filter((m) => wanted.includes(m.displayName.toLowerCase()))
+    : state.members;
+  if (members.length === 0) fail(`No family member called ${only.join(", ")}.`);
+  for (const m of members) {
     let res = await http(`${state.supabaseUrl}/auth/v1/admin/generate_link`, {
       method: "POST",
       headers,
@@ -568,10 +588,14 @@ async function main() {
       return;
     }
     if (command === "links") {
-      await signInLinks();
+      await signInLinks(process.argv.slice(3));
       return;
     }
-    if (command !== "all") fail(`Unknown command “${command}”. Use: setup, setup -- links, setup -- status`);
+    if (command === "emails") {
+      delete state.members;
+      saveState();
+    } else if (command !== "all")
+      fail(`Unknown command “${command}”. Use: setup, setup -- links, setup -- status, setup -- emails`);
     console.log(bold("Family Ledger setup") + " — safe to re-run; finished steps are skipped.");
     await checkTools();
     await collectFamily();
